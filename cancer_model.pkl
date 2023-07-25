@@ -1,0 +1,1080 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "bdfdaae8",
+   "metadata": {},
+   "source": [
+    "#### Import libraries and breastcancer dataset"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 243,
+   "id": "773b13b6",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import pandas as pd\n",
+    "import matplotlib.pyplot as plt\n",
+    "import numpy as np\n",
+    "import plotly.express as px\n",
+    "import seaborn as sns\n",
+    "%matplotlib inline\n",
+    "from sklearn.model_selection import train_test_split\n",
+    "from sklearn.tree import DecisionTreeClassifier\n",
+    "from sklearn.metrics import classification_report, confusion_matrix, accuracy_score\n",
+    "from sklearn.neighbors import KNeighborsClassifier\n",
+    "from sklearn.model_selection import RandomizedSearchCV\n",
+    "from sklearn.model_selection import GridSearchCV\n",
+    "import streamlit as st\n",
+    "import tensorflow as tf"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 24,
+   "id": "11f0ce13",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "c = pd.read_csv(r'C:\\Users\\Aaron Mobley\\Desktop\\Python\\Breast Cancer.csv')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 25,
+   "id": "54197bc5",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Patient_ID</th>\n",
+       "      <th>Age</th>\n",
+       "      <th>Gender</th>\n",
+       "      <th>Protein1</th>\n",
+       "      <th>Protein2</th>\n",
+       "      <th>Protein3</th>\n",
+       "      <th>Protein4</th>\n",
+       "      <th>Tumour_Stage</th>\n",
+       "      <th>Histology</th>\n",
+       "      <th>ER status</th>\n",
+       "      <th>PR status</th>\n",
+       "      <th>HER2 status</th>\n",
+       "      <th>Surgery_type</th>\n",
+       "      <th>Date_of_Surgery</th>\n",
+       "      <th>Date_of_Last_Visit</th>\n",
+       "      <th>Patient_Status</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>TCGA-D8-A1XD</td>\n",
+       "      <td>36.0</td>\n",
+       "      <td>FEMALE</td>\n",
+       "      <td>0.080353</td>\n",
+       "      <td>0.42638</td>\n",
+       "      <td>0.54715</td>\n",
+       "      <td>0.273680</td>\n",
+       "      <td>III</td>\n",
+       "      <td>Infiltrating Ductal Carcinoma</td>\n",
+       "      <td>Positive</td>\n",
+       "      <td>Positive</td>\n",
+       "      <td>Negative</td>\n",
+       "      <td>Modified Radical Mastectomy</td>\n",
+       "      <td>15-Jan-17</td>\n",
+       "      <td>19-Jun-17</td>\n",
+       "      <td>Alive</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>TCGA-EW-A1OX</td>\n",
+       "      <td>43.0</td>\n",
+       "      <td>FEMALE</td>\n",
+       "      <td>-0.420320</td>\n",
+       "      <td>0.57807</td>\n",
+       "      <td>0.61447</td>\n",
+       "      <td>-0.031505</td>\n",
+       "      <td>II</td>\n",
+       "      <td>Mucinous Carcinoma</td>\n",
+       "      <td>Positive</td>\n",
+       "      <td>Positive</td>\n",
+       "      <td>Negative</td>\n",
+       "      <td>Lumpectomy</td>\n",
+       "      <td>26-Apr-17</td>\n",
+       "      <td>09-Nov-18</td>\n",
+       "      <td>Dead</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>TCGA-A8-A079</td>\n",
+       "      <td>69.0</td>\n",
+       "      <td>FEMALE</td>\n",
+       "      <td>0.213980</td>\n",
+       "      <td>1.31140</td>\n",
+       "      <td>-0.32747</td>\n",
+       "      <td>-0.234260</td>\n",
+       "      <td>III</td>\n",
+       "      <td>Infiltrating Ductal Carcinoma</td>\n",
+       "      <td>Positive</td>\n",
+       "      <td>Positive</td>\n",
+       "      <td>Negative</td>\n",
+       "      <td>Other</td>\n",
+       "      <td>08-Sep-17</td>\n",
+       "      <td>09-Jun-18</td>\n",
+       "      <td>Alive</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>TCGA-D8-A1XR</td>\n",
+       "      <td>56.0</td>\n",
+       "      <td>FEMALE</td>\n",
+       "      <td>0.345090</td>\n",
+       "      <td>-0.21147</td>\n",
+       "      <td>-0.19304</td>\n",
+       "      <td>0.124270</td>\n",
+       "      <td>II</td>\n",
+       "      <td>Infiltrating Ductal Carcinoma</td>\n",
+       "      <td>Positive</td>\n",
+       "      <td>Positive</td>\n",
+       "      <td>Negative</td>\n",
+       "      <td>Modified Radical Mastectomy</td>\n",
+       "      <td>25-Jan-17</td>\n",
+       "      <td>12-Jul-17</td>\n",
+       "      <td>Alive</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>TCGA-BH-A0BF</td>\n",
+       "      <td>56.0</td>\n",
+       "      <td>FEMALE</td>\n",
+       "      <td>0.221550</td>\n",
+       "      <td>1.90680</td>\n",
+       "      <td>0.52045</td>\n",
+       "      <td>-0.311990</td>\n",
+       "      <td>II</td>\n",
+       "      <td>Infiltrating Ductal Carcinoma</td>\n",
+       "      <td>Positive</td>\n",
+       "      <td>Positive</td>\n",
+       "      <td>Negative</td>\n",
+       "      <td>Other</td>\n",
+       "      <td>06-May-17</td>\n",
+       "      <td>27-Jun-19</td>\n",
+       "      <td>Dead</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "     Patient_ID   Age  Gender  Protein1  Protein2  Protein3  Protein4  \\\n",
+       "0  TCGA-D8-A1XD  36.0  FEMALE  0.080353   0.42638   0.54715  0.273680   \n",
+       "1  TCGA-EW-A1OX  43.0  FEMALE -0.420320   0.57807   0.61447 -0.031505   \n",
+       "2  TCGA-A8-A079  69.0  FEMALE  0.213980   1.31140  -0.32747 -0.234260   \n",
+       "3  TCGA-D8-A1XR  56.0  FEMALE  0.345090  -0.21147  -0.19304  0.124270   \n",
+       "4  TCGA-BH-A0BF  56.0  FEMALE  0.221550   1.90680   0.52045 -0.311990   \n",
+       "\n",
+       "  Tumour_Stage                      Histology ER status PR status HER2 status  \\\n",
+       "0          III  Infiltrating Ductal Carcinoma  Positive  Positive    Negative   \n",
+       "1           II             Mucinous Carcinoma  Positive  Positive    Negative   \n",
+       "2          III  Infiltrating Ductal Carcinoma  Positive  Positive    Negative   \n",
+       "3           II  Infiltrating Ductal Carcinoma  Positive  Positive    Negative   \n",
+       "4           II  Infiltrating Ductal Carcinoma  Positive  Positive    Negative   \n",
+       "\n",
+       "                  Surgery_type Date_of_Surgery Date_of_Last_Visit  \\\n",
+       "0  Modified Radical Mastectomy       15-Jan-17          19-Jun-17   \n",
+       "1                   Lumpectomy       26-Apr-17          09-Nov-18   \n",
+       "2                        Other       08-Sep-17          09-Jun-18   \n",
+       "3  Modified Radical Mastectomy       25-Jan-17          12-Jul-17   \n",
+       "4                        Other       06-May-17          27-Jun-19   \n",
+       "\n",
+       "  Patient_Status  \n",
+       "0          Alive  \n",
+       "1           Dead  \n",
+       "2          Alive  \n",
+       "3          Alive  \n",
+       "4           Dead  "
+      ]
+     },
+     "execution_count": 25,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "c.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "4faa0888",
+   "metadata": {},
+   "source": [
+    "#### Data exploration"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 26,
+   "id": "967ee1aa",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "<Axes: >"
+      ]
+     },
+     "execution_count": 26,
+     "metadata": {},
+     "output_type": "execute_result"
+    },
+    {
+     "data": {
+      "image/png": "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8vLyjN/vN3PmzInEB3M6ac2aNWbatGn97mNGX1u5cqW55pprvnU/s+rfsmXLzOTJk013dzczOsW8efPMokWLem2bP3++ueOOO4wxPJ96dHR0mOTkZPPiiy/22j5t2jRTUVER9zkNu2+7nKqrq0vbtm3T8ePHVVhYqNbWVgUCAZWWlkaOcbvdmjNnjhoaGuK40vhYunSp5s2bpxtuuKHXdub0tX379snr9So3N1e33Xab9u/fL4kZneqFF15QQUGBfvKTn2jcuHGaPn26Hn/88ch+ZtVXZ2entm7dqkWLFsnlcjGjU1xzzTX617/+pffee0+S9L///U+vv/66brzxRkk8n3p89dVX6urq0siRI3ttT0tL0+uvvx73OQ3L+Ghubtbo0aPldrt177336u9//7uuvPLKyJvhffMN8LKysvq8Ud5Qt23bNr311luqqqrqs485nTRr1iw99dRTqq2t1eOPP65AIKCioiJ99tlnzOgU+/fv1+bNm5WXl6fa2lrde++9+tWvfqWnnnpKEs+n/jz//PM6evSo7rrrLknM6FQrV67UggULdPnllys1NVXTp09XeXm5FixYIIlZ9cjIyFBhYaEeeughHTp0SF1dXdq6daveeOMNHT58OO5zGpD/vfpgd9lll6mpqUlHjx7Vs88+q4ULF6q+vj6y3+Vy9TreGNNn21B28OBBLVu2THV1dX2q+VTDfU5z586N/POUKVNUWFioyZMna8uWLbr66qslMSNJ6u7uVkFBgSorKyVJ06dPV0tLizZv3qyf/exnkeOY1deeeOIJzZ07t89bkzMj6emnn9bWrVtVU1Ojq666Sk1NTSovL5fX69XChQsjxzEr6a9//asWLVqkiy66SMnJyfre976nsrIyvfXWW5Fj4jWnYXnnY8SIEbrkkktUUFCgqqoqTZs2TY8++mjkNxW+WX1tbW196nAo27Nnj9ra2jRjxgylpKQoJSVF9fX1+sMf/qCUlJTILIb7nL5p1KhRmjJlivbt28dz6RTZ2dm68sore2274oor9OGHH0oSs/qGAwcO6JVXXtHdd98d2caMvva73/1Oq1at0m233aYpU6bozjvv1K9//evIXVpm9bXJkyervr5eX3zxhQ4ePKg333xT4XBYubm5cZ/TsIyPbzLGKBQKRf6D+P3+yL7Ozk7V19erqKgojiu06/rrr1dzc7OampoiHwUFBbr99tvV1NSkSZMmMad+hEIhvfvuu8rOzua5dIrZs2dr7969vba99957kTeaZFa9Pfnkkxo3bpzmzZsX2caMvtbR0aGkpN5fupKTkyO/asus+ho1apSys7N15MgR1dbW6uabb47/nAb8R1oHmdWrV5udO3ea1tZW8/bbb5v777/fJCUlmbq6OmPMyV89GjNmjHnuuedMc3OzWbBgwbD8Fa1vOvW3XYxhTsYY85vf/Ma8+uqrZv/+/WbXrl3mxz/+scnIyDAffPCBMYYZ9XjzzTdNSkqKefjhh82+ffvM3/72N5Oenm62bt0aOYZZndTV1WXGjx9vVq5c2WcfMzpp4cKF5qKLLor8qu1zzz1nLrjgArNixYrIMczqpB07dpiXX37Z7N+/39TV1Zlp06aZmTNnms7OTmNMfOc07OJj0aJFZsKECWbEiBHmwgsvNNdff30kPIw5+Wtaa9asMR6Px7jdbnPdddeZ5ubmOK54cPhmfDAnE/md+NTUVOP1es38+fNNS0tLZD8z+to///lPk5+fb9xut7n88svNY4891ms/szqptrbWSDJ79+7ts48ZnRQMBs2yZcvM+PHjzciRI82kSZNMRUWFCYVCkWOY1UlPP/20mTRpkhkxYoTxeDxm6dKl5ujRo5H98ZyTyxhjBv7+CgAAwEn8zAcAALCK+AAAAFYRHwAAwCriAwAAWEV8AAAAq4gPAABgFfEBAACsIj4AAIBVxAcAALCK+AAAAFYRHwAAwCriAwAAWPV/8bOPPJYA+PsAAAAASUVORK5CYII=",
+      "text/plain": [
+       "<Figure size 640x480 with 1 Axes>"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "c['Age'].hist()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 27,
+   "id": "c69fe5b4",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "Patient_ID             7\n",
+       "Age                    7\n",
+       "Gender                 7\n",
+       "Protein1               7\n",
+       "Protein2               7\n",
+       "Protein3               7\n",
+       "Protein4               7\n",
+       "Tumour_Stage           7\n",
+       "Histology              7\n",
+       "ER status              7\n",
+       "PR status              7\n",
+       "HER2 status            7\n",
+       "Surgery_type           7\n",
+       "Date_of_Surgery        7\n",
+       "Date_of_Last_Visit    24\n",
+       "Patient_Status        20\n",
+       "dtype: int64"
+      ]
+     },
+     "execution_count": 27,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "c.isnull().sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 28,
+   "id": "ed641859",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "c.dropna(inplace = True)\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 29,
+   "id": "b3db6dcd",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "Patient_ID            0\n",
+       "Age                   0\n",
+       "Gender                0\n",
+       "Protein1              0\n",
+       "Protein2              0\n",
+       "Protein3              0\n",
+       "Protein4              0\n",
+       "Tumour_Stage          0\n",
+       "Histology             0\n",
+       "ER status             0\n",
+       "PR status             0\n",
+       "HER2 status           0\n",
+       "Surgery_type          0\n",
+       "Date_of_Surgery       0\n",
+       "Date_of_Last_Visit    0\n",
+       "Patient_Status        0\n",
+       "dtype: int64"
+      ]
+     },
+     "execution_count": 29,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "c.isnull().sum()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a41b0765",
+   "metadata": {},
+   "source": [
+    "#### Gender and Tumour stage need to be recoded"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 76,
+   "id": "9f04a76c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def gender (series): \n",
+    "    if series == \"MALE\":\n",
+    "        return 0\n",
+    "    if series == \"FEMALE\": \n",
+    "        return 1\n",
+    "    \n",
+    "c['GenderR'] = c['Gender'].apply(gender) \n",
+    "\n",
+    "def tumour (series):\n",
+    "    if series == \"I\":\n",
+    "        return 1\n",
+    "    if series == \"II\":\n",
+    "        return 2\n",
+    "    if series == \"III\":\n",
+    "        return 3\n",
+    "    \n",
+    "c['Tumour_StageR'] = c['Tumour_Stage'].apply(tumour)\n",
+    "\n",
+    "def surgery (series):\n",
+    "    if series == \"Modified Radical Mastectomy\":\n",
+    "        return 1\n",
+    "    if series == \"Simple Mastectomy\":\n",
+    "        return 2\n",
+    "    if series == \"Lumpectomy\":\n",
+    "        return 3\n",
+    "    if series == \"Other\":\n",
+    "        return 4\n",
+    "    \n",
+    "c['Surgery_typeR'] = c['Surgery_type'].apply(surgery)\n",
+    "\n",
+    "def hist (series):\n",
+    "    if series == \"Infiltrating Ductal Carcinoma\":\n",
+    "        return 1\n",
+    "    if series == \"Infiltrating Lobular Carcinoma\":\n",
+    "        return 2\n",
+    "    if series == \"Mucinous Carcinoma\":\n",
+    "        return 3\n",
+    "    \n",
+    "c['HistologyR'] = c['Histology'].apply(hist)\n",
+    "\n",
+    "def status (series):\n",
+    "    if series == \"Dead\":\n",
+    "        return 0\n",
+    "    if series == \"Alive\":\n",
+    "        return 1\n",
+    "c['Patient_StatusR'] = c['Patient_Status'].apply(status)\n",
+    "\n",
+    "def ER (series):\n",
+    "    if series == \"Positive\":\n",
+    "        return 0\n",
+    "    if series == \"Negative\":\n",
+    "        return 1\n",
+    "    \n",
+    "c['ER statusR'] = c['ER status'].apply(ER)\n",
+    "\n",
+    "def HER (series):\n",
+    "    if series == \"Positive\":\n",
+    "        return 0\n",
+    "    if series == \"Negative\":\n",
+    "        return 1\n",
+    "    \n",
+    "c['HER2 statusR'] = c['ER status'].apply(HER)\n",
+    "\n",
+    "def PR (series):\n",
+    "    if series == \"Positive\":\n",
+    "        return 0\n",
+    "    if series == \"Negative\":\n",
+    "        return 1\n",
+    "    \n",
+    "c['PR statusR'] = c['PR status'].apply(PR)\n",
+    "    "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 77,
+   "id": "b41a0485",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Patient_ID</th>\n",
+       "      <th>Age</th>\n",
+       "      <th>Gender</th>\n",
+       "      <th>Protein1</th>\n",
+       "      <th>Protein2</th>\n",
+       "      <th>Protein3</th>\n",
+       "      <th>Protein4</th>\n",
+       "      <th>Tumour_Stage</th>\n",
+       "      <th>Histology</th>\n",
+       "      <th>ER status</th>\n",
+       "      <th>...</th>\n",
+       "      <th>Date_of_Last_Visit</th>\n",
+       "      <th>Patient_Status</th>\n",
+       "      <th>GenderR</th>\n",
+       "      <th>Tumour_StageR</th>\n",
+       "      <th>Surgery_typeR</th>\n",
+       "      <th>HistologyR</th>\n",
+       "      <th>Patient_StatusR</th>\n",
+       "      <th>ER statusR</th>\n",
+       "      <th>HER2 statusR</th>\n",
+       "      <th>PR statusR</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>TCGA-D8-A1XD</td>\n",
+       "      <td>36.0</td>\n",
+       "      <td>FEMALE</td>\n",
+       "      <td>0.080353</td>\n",
+       "      <td>0.42638</td>\n",
+       "      <td>0.54715</td>\n",
+       "      <td>0.273680</td>\n",
+       "      <td>III</td>\n",
+       "      <td>Infiltrating Ductal Carcinoma</td>\n",
+       "      <td>Positive</td>\n",
+       "      <td>...</td>\n",
+       "      <td>19-Jun-17</td>\n",
+       "      <td>Alive</td>\n",
+       "      <td>1</td>\n",
+       "      <td>3</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>TCGA-EW-A1OX</td>\n",
+       "      <td>43.0</td>\n",
+       "      <td>FEMALE</td>\n",
+       "      <td>-0.420320</td>\n",
+       "      <td>0.57807</td>\n",
+       "      <td>0.61447</td>\n",
+       "      <td>-0.031505</td>\n",
+       "      <td>II</td>\n",
+       "      <td>Mucinous Carcinoma</td>\n",
+       "      <td>Positive</td>\n",
+       "      <td>...</td>\n",
+       "      <td>09-Nov-18</td>\n",
+       "      <td>Dead</td>\n",
+       "      <td>1</td>\n",
+       "      <td>2</td>\n",
+       "      <td>3</td>\n",
+       "      <td>3</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>TCGA-A8-A079</td>\n",
+       "      <td>69.0</td>\n",
+       "      <td>FEMALE</td>\n",
+       "      <td>0.213980</td>\n",
+       "      <td>1.31140</td>\n",
+       "      <td>-0.32747</td>\n",
+       "      <td>-0.234260</td>\n",
+       "      <td>III</td>\n",
+       "      <td>Infiltrating Ductal Carcinoma</td>\n",
+       "      <td>Positive</td>\n",
+       "      <td>...</td>\n",
+       "      <td>09-Jun-18</td>\n",
+       "      <td>Alive</td>\n",
+       "      <td>1</td>\n",
+       "      <td>3</td>\n",
+       "      <td>4</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>TCGA-D8-A1XR</td>\n",
+       "      <td>56.0</td>\n",
+       "      <td>FEMALE</td>\n",
+       "      <td>0.345090</td>\n",
+       "      <td>-0.21147</td>\n",
+       "      <td>-0.19304</td>\n",
+       "      <td>0.124270</td>\n",
+       "      <td>II</td>\n",
+       "      <td>Infiltrating Ductal Carcinoma</td>\n",
+       "      <td>Positive</td>\n",
+       "      <td>...</td>\n",
+       "      <td>12-Jul-17</td>\n",
+       "      <td>Alive</td>\n",
+       "      <td>1</td>\n",
+       "      <td>2</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>TCGA-BH-A0BF</td>\n",
+       "      <td>56.0</td>\n",
+       "      <td>FEMALE</td>\n",
+       "      <td>0.221550</td>\n",
+       "      <td>1.90680</td>\n",
+       "      <td>0.52045</td>\n",
+       "      <td>-0.311990</td>\n",
+       "      <td>II</td>\n",
+       "      <td>Infiltrating Ductal Carcinoma</td>\n",
+       "      <td>Positive</td>\n",
+       "      <td>...</td>\n",
+       "      <td>27-Jun-19</td>\n",
+       "      <td>Dead</td>\n",
+       "      <td>1</td>\n",
+       "      <td>2</td>\n",
+       "      <td>4</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "<p>5 rows × 24 columns</p>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "     Patient_ID   Age  Gender  Protein1  Protein2  Protein3  Protein4  \\\n",
+       "0  TCGA-D8-A1XD  36.0  FEMALE  0.080353   0.42638   0.54715  0.273680   \n",
+       "1  TCGA-EW-A1OX  43.0  FEMALE -0.420320   0.57807   0.61447 -0.031505   \n",
+       "2  TCGA-A8-A079  69.0  FEMALE  0.213980   1.31140  -0.32747 -0.234260   \n",
+       "3  TCGA-D8-A1XR  56.0  FEMALE  0.345090  -0.21147  -0.19304  0.124270   \n",
+       "4  TCGA-BH-A0BF  56.0  FEMALE  0.221550   1.90680   0.52045 -0.311990   \n",
+       "\n",
+       "  Tumour_Stage                      Histology ER status  ...  \\\n",
+       "0          III  Infiltrating Ductal Carcinoma  Positive  ...   \n",
+       "1           II             Mucinous Carcinoma  Positive  ...   \n",
+       "2          III  Infiltrating Ductal Carcinoma  Positive  ...   \n",
+       "3           II  Infiltrating Ductal Carcinoma  Positive  ...   \n",
+       "4           II  Infiltrating Ductal Carcinoma  Positive  ...   \n",
+       "\n",
+       "  Date_of_Last_Visit Patient_Status GenderR Tumour_StageR Surgery_typeR  \\\n",
+       "0          19-Jun-17          Alive       1             3             1   \n",
+       "1          09-Nov-18           Dead       1             2             3   \n",
+       "2          09-Jun-18          Alive       1             3             4   \n",
+       "3          12-Jul-17          Alive       1             2             1   \n",
+       "4          27-Jun-19           Dead       1             2             4   \n",
+       "\n",
+       "  HistologyR  Patient_StatusR  ER statusR  HER2 statusR  PR statusR  \n",
+       "0          1                1           0             0           0  \n",
+       "1          3                0           0             0           0  \n",
+       "2          1                1           0             0           0  \n",
+       "3          1                1           0             0           0  \n",
+       "4          1                0           0             0           0  \n",
+       "\n",
+       "[5 rows x 24 columns]"
+      ]
+     },
+     "execution_count": 77,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "c.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 38,
+   "id": "045825d1",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "c = c[c['GenderR'] != 'I']"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 39,
+   "id": "13d7822f",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0    1\n",
+       "1    1\n",
+       "2    1\n",
+       "3    1\n",
+       "4    1\n",
+       "Name: GenderR, dtype: int64"
+      ]
+     },
+     "execution_count": 39,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "c['GenderR'].head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "5ac69a0c",
+   "metadata": {},
+   "source": [
+    "#### Now the gender, histology, surgery type, tumour has been recoded and we have cleaned up the null and NaN values - Decision Tree"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 178,
+   "id": "3a7ae506",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "x = c[['Age', 'GenderR', 'Protein1', 'Protein2', 'Protein3', 'Protein4', 'Tumour_StageR',\n",
+    "     'HistologyR', 'Surgery_typeR', 'ER statusR', 'PR statusR', 'HER2 statusR']]\n",
+    "y = c['Patient_StatusR']"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 230,
+   "id": "f806731b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "x_train, x_test, y_train, y_test = train_test_split(x,y, test_size=0.06, random_state=79)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 231,
+   "id": "29a62de4",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<style>#sk-container-id-34 {color: black;background-color: white;}#sk-container-id-34 pre{padding: 0;}#sk-container-id-34 div.sk-toggleable {background-color: white;}#sk-container-id-34 label.sk-toggleable__label {cursor: pointer;display: block;width: 100%;margin-bottom: 0;padding: 0.3em;box-sizing: border-box;text-align: center;}#sk-container-id-34 label.sk-toggleable__label-arrow:before {content: \"▸\";float: left;margin-right: 0.25em;color: #696969;}#sk-container-id-34 label.sk-toggleable__label-arrow:hover:before {color: black;}#sk-container-id-34 div.sk-estimator:hover label.sk-toggleable__label-arrow:before {color: black;}#sk-container-id-34 div.sk-toggleable__content {max-height: 0;max-width: 0;overflow: hidden;text-align: left;background-color: #f0f8ff;}#sk-container-id-34 div.sk-toggleable__content pre {margin: 0.2em;color: black;border-radius: 0.25em;background-color: #f0f8ff;}#sk-container-id-34 input.sk-toggleable__control:checked~div.sk-toggleable__content {max-height: 200px;max-width: 100%;overflow: auto;}#sk-container-id-34 input.sk-toggleable__control:checked~label.sk-toggleable__label-arrow:before {content: \"▾\";}#sk-container-id-34 div.sk-estimator input.sk-toggleable__control:checked~label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-34 div.sk-label input.sk-toggleable__control:checked~label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-34 input.sk-hidden--visually {border: 0;clip: rect(1px 1px 1px 1px);clip: rect(1px, 1px, 1px, 1px);height: 1px;margin: -1px;overflow: hidden;padding: 0;position: absolute;width: 1px;}#sk-container-id-34 div.sk-estimator {font-family: monospace;background-color: #f0f8ff;border: 1px dotted black;border-radius: 0.25em;box-sizing: border-box;margin-bottom: 0.5em;}#sk-container-id-34 div.sk-estimator:hover {background-color: #d4ebff;}#sk-container-id-34 div.sk-parallel-item::after {content: \"\";width: 100%;border-bottom: 1px solid gray;flex-grow: 1;}#sk-container-id-34 div.sk-label:hover label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-34 div.sk-serial::before {content: \"\";position: absolute;border-left: 1px solid gray;box-sizing: border-box;top: 0;bottom: 0;left: 50%;z-index: 0;}#sk-container-id-34 div.sk-serial {display: flex;flex-direction: column;align-items: center;background-color: white;padding-right: 0.2em;padding-left: 0.2em;position: relative;}#sk-container-id-34 div.sk-item {position: relative;z-index: 1;}#sk-container-id-34 div.sk-parallel {display: flex;align-items: stretch;justify-content: center;background-color: white;position: relative;}#sk-container-id-34 div.sk-item::before, #sk-container-id-34 div.sk-parallel-item::before {content: \"\";position: absolute;border-left: 1px solid gray;box-sizing: border-box;top: 0;bottom: 0;left: 50%;z-index: -1;}#sk-container-id-34 div.sk-parallel-item {display: flex;flex-direction: column;z-index: 1;position: relative;background-color: white;}#sk-container-id-34 div.sk-parallel-item:first-child::after {align-self: flex-end;width: 50%;}#sk-container-id-34 div.sk-parallel-item:last-child::after {align-self: flex-start;width: 50%;}#sk-container-id-34 div.sk-parallel-item:only-child::after {width: 0;}#sk-container-id-34 div.sk-dashed-wrapped {border: 1px dashed gray;margin: 0 0.4em 0.5em 0.4em;box-sizing: border-box;padding-bottom: 0.4em;background-color: white;}#sk-container-id-34 div.sk-label label {font-family: monospace;font-weight: bold;display: inline-block;line-height: 1.2em;}#sk-container-id-34 div.sk-label-container {text-align: center;}#sk-container-id-34 div.sk-container {/* jupyter's `normalize.less` sets `[hidden] { display: none; }` but bootstrap.min.css set `[hidden] { display: none !important; }` so we also need the `!important` here to be able to override the default hidden behavior on the sphinx rendered scikit-learn.org. See: https://github.com/scikit-learn/scikit-learn/issues/21755 */display: inline-block !important;position: relative;}#sk-container-id-34 div.sk-text-repr-fallback {display: none;}</style><div id=\"sk-container-id-34\" class=\"sk-top-container\"><div class=\"sk-text-repr-fallback\"><pre>DecisionTreeClassifier(random_state=79)</pre><b>In a Jupyter environment, please rerun this cell to show the HTML representation or trust the notebook. <br />On GitHub, the HTML representation is unable to render, please try loading this page with nbviewer.org.</b></div><div class=\"sk-container\" hidden><div class=\"sk-item\"><div class=\"sk-estimator sk-toggleable\"><input class=\"sk-toggleable__control sk-hidden--visually\" id=\"sk-estimator-id-36\" type=\"checkbox\" checked><label for=\"sk-estimator-id-36\" class=\"sk-toggleable__label sk-toggleable__label-arrow\">DecisionTreeClassifier</label><div class=\"sk-toggleable__content\"><pre>DecisionTreeClassifier(random_state=79)</pre></div></div></div></div></div>"
+      ],
+      "text/plain": [
+       "DecisionTreeClassifier(random_state=79)"
+      ]
+     },
+     "execution_count": 231,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "decisionTree = DecisionTreeClassifier(random_state = 79)\n",
+    "decisionTree.fit(x_train, y_train)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 232,
+   "id": "7c5a4df9",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array([1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0],\n",
+       "      dtype=int64)"
+      ]
+     },
+     "execution_count": 232,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "treePredictions = decisionTree.predict(x_test)\n",
+    "treePredictions"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 233,
+   "id": "c01673f8",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "[[ 3  3]\n",
+      " [ 2 12]]\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(confusion_matrix(y_test, treePredictions))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "0a8e307b",
+   "metadata": {},
+   "source": [
+    "#### print classification report "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 234,
+   "id": "1432b013",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "              precision    recall  f1-score   support\n",
+      "\n",
+      "           0       0.60      0.50      0.55         6\n",
+      "           1       0.80      0.86      0.83        14\n",
+      "\n",
+      "    accuracy                           0.75        20\n",
+      "   macro avg       0.70      0.68      0.69        20\n",
+      "weighted avg       0.74      0.75      0.74        20\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(classification_report(y_test, treePredictions))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "2e7a4602",
+   "metadata": {},
+   "source": [
+    "#### Hyperparameter tuning "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 160,
+   "id": "39a457b5",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "param_grid = {\n",
+    "    'max_depth': [2, 4, 6, 8, 10],\n",
+    "    'min_samples_split': [2, 4, 6, 8],\n",
+    "    'min_samples_leaf': [1, 2, 3, 4],\n",
+    "    'criterion': ['gini', 'entropy']}\n",
+    "    "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 161,
+   "id": "04244c99",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "clf = DecisionTreeClassifier(random_state=73)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 164,
+   "id": "391371e8",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<style>#sk-container-id-20 {color: black;background-color: white;}#sk-container-id-20 pre{padding: 0;}#sk-container-id-20 div.sk-toggleable {background-color: white;}#sk-container-id-20 label.sk-toggleable__label {cursor: pointer;display: block;width: 100%;margin-bottom: 0;padding: 0.3em;box-sizing: border-box;text-align: center;}#sk-container-id-20 label.sk-toggleable__label-arrow:before {content: \"▸\";float: left;margin-right: 0.25em;color: #696969;}#sk-container-id-20 label.sk-toggleable__label-arrow:hover:before {color: black;}#sk-container-id-20 div.sk-estimator:hover label.sk-toggleable__label-arrow:before {color: black;}#sk-container-id-20 div.sk-toggleable__content {max-height: 0;max-width: 0;overflow: hidden;text-align: left;background-color: #f0f8ff;}#sk-container-id-20 div.sk-toggleable__content pre {margin: 0.2em;color: black;border-radius: 0.25em;background-color: #f0f8ff;}#sk-container-id-20 input.sk-toggleable__control:checked~div.sk-toggleable__content {max-height: 200px;max-width: 100%;overflow: auto;}#sk-container-id-20 input.sk-toggleable__control:checked~label.sk-toggleable__label-arrow:before {content: \"▾\";}#sk-container-id-20 div.sk-estimator input.sk-toggleable__control:checked~label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-20 div.sk-label input.sk-toggleable__control:checked~label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-20 input.sk-hidden--visually {border: 0;clip: rect(1px 1px 1px 1px);clip: rect(1px, 1px, 1px, 1px);height: 1px;margin: -1px;overflow: hidden;padding: 0;position: absolute;width: 1px;}#sk-container-id-20 div.sk-estimator {font-family: monospace;background-color: #f0f8ff;border: 1px dotted black;border-radius: 0.25em;box-sizing: border-box;margin-bottom: 0.5em;}#sk-container-id-20 div.sk-estimator:hover {background-color: #d4ebff;}#sk-container-id-20 div.sk-parallel-item::after {content: \"\";width: 100%;border-bottom: 1px solid gray;flex-grow: 1;}#sk-container-id-20 div.sk-label:hover label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-20 div.sk-serial::before {content: \"\";position: absolute;border-left: 1px solid gray;box-sizing: border-box;top: 0;bottom: 0;left: 50%;z-index: 0;}#sk-container-id-20 div.sk-serial {display: flex;flex-direction: column;align-items: center;background-color: white;padding-right: 0.2em;padding-left: 0.2em;position: relative;}#sk-container-id-20 div.sk-item {position: relative;z-index: 1;}#sk-container-id-20 div.sk-parallel {display: flex;align-items: stretch;justify-content: center;background-color: white;position: relative;}#sk-container-id-20 div.sk-item::before, #sk-container-id-20 div.sk-parallel-item::before {content: \"\";position: absolute;border-left: 1px solid gray;box-sizing: border-box;top: 0;bottom: 0;left: 50%;z-index: -1;}#sk-container-id-20 div.sk-parallel-item {display: flex;flex-direction: column;z-index: 1;position: relative;background-color: white;}#sk-container-id-20 div.sk-parallel-item:first-child::after {align-self: flex-end;width: 50%;}#sk-container-id-20 div.sk-parallel-item:last-child::after {align-self: flex-start;width: 50%;}#sk-container-id-20 div.sk-parallel-item:only-child::after {width: 0;}#sk-container-id-20 div.sk-dashed-wrapped {border: 1px dashed gray;margin: 0 0.4em 0.5em 0.4em;box-sizing: border-box;padding-bottom: 0.4em;background-color: white;}#sk-container-id-20 div.sk-label label {font-family: monospace;font-weight: bold;display: inline-block;line-height: 1.2em;}#sk-container-id-20 div.sk-label-container {text-align: center;}#sk-container-id-20 div.sk-container {/* jupyter's `normalize.less` sets `[hidden] { display: none; }` but bootstrap.min.css set `[hidden] { display: none !important; }` so we also need the `!important` here to be able to override the default hidden behavior on the sphinx rendered scikit-learn.org. See: https://github.com/scikit-learn/scikit-learn/issues/21755 */display: inline-block !important;position: relative;}#sk-container-id-20 div.sk-text-repr-fallback {display: none;}</style><div id=\"sk-container-id-20\" class=\"sk-top-container\"><div class=\"sk-text-repr-fallback\"><pre>GridSearchCV(cv=5, estimator=DecisionTreeClassifier(random_state=73),\n",
+       "             param_grid={&#x27;criterion&#x27;: [&#x27;gini&#x27;, &#x27;entropy&#x27;],\n",
+       "                         &#x27;max_depth&#x27;: [2, 4, 6, 8, 10],\n",
+       "                         &#x27;min_samples_leaf&#x27;: [1, 2, 3, 4],\n",
+       "                         &#x27;min_samples_split&#x27;: [2, 4, 6, 8]})</pre><b>In a Jupyter environment, please rerun this cell to show the HTML representation or trust the notebook. <br />On GitHub, the HTML representation is unable to render, please try loading this page with nbviewer.org.</b></div><div class=\"sk-container\" hidden><div class=\"sk-item sk-dashed-wrapped\"><div class=\"sk-label-container\"><div class=\"sk-label sk-toggleable\"><input class=\"sk-toggleable__control sk-hidden--visually\" id=\"sk-estimator-id-20\" type=\"checkbox\" ><label for=\"sk-estimator-id-20\" class=\"sk-toggleable__label sk-toggleable__label-arrow\">GridSearchCV</label><div class=\"sk-toggleable__content\"><pre>GridSearchCV(cv=5, estimator=DecisionTreeClassifier(random_state=73),\n",
+       "             param_grid={&#x27;criterion&#x27;: [&#x27;gini&#x27;, &#x27;entropy&#x27;],\n",
+       "                         &#x27;max_depth&#x27;: [2, 4, 6, 8, 10],\n",
+       "                         &#x27;min_samples_leaf&#x27;: [1, 2, 3, 4],\n",
+       "                         &#x27;min_samples_split&#x27;: [2, 4, 6, 8]})</pre></div></div></div><div class=\"sk-parallel\"><div class=\"sk-parallel-item\"><div class=\"sk-item\"><div class=\"sk-label-container\"><div class=\"sk-label sk-toggleable\"><input class=\"sk-toggleable__control sk-hidden--visually\" id=\"sk-estimator-id-21\" type=\"checkbox\" ><label for=\"sk-estimator-id-21\" class=\"sk-toggleable__label sk-toggleable__label-arrow\">estimator: DecisionTreeClassifier</label><div class=\"sk-toggleable__content\"><pre>DecisionTreeClassifier(random_state=73)</pre></div></div></div><div class=\"sk-serial\"><div class=\"sk-item\"><div class=\"sk-estimator sk-toggleable\"><input class=\"sk-toggleable__control sk-hidden--visually\" id=\"sk-estimator-id-22\" type=\"checkbox\" ><label for=\"sk-estimator-id-22\" class=\"sk-toggleable__label sk-toggleable__label-arrow\">DecisionTreeClassifier</label><div class=\"sk-toggleable__content\"><pre>DecisionTreeClassifier(random_state=73)</pre></div></div></div></div></div></div></div></div></div></div>"
+      ],
+      "text/plain": [
+       "GridSearchCV(cv=5, estimator=DecisionTreeClassifier(random_state=73),\n",
+       "             param_grid={'criterion': ['gini', 'entropy'],\n",
+       "                         'max_depth': [2, 4, 6, 8, 10],\n",
+       "                         'min_samples_leaf': [1, 2, 3, 4],\n",
+       "                         'min_samples_split': [2, 4, 6, 8]})"
+      ]
+     },
+     "execution_count": 164,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "grid_search = GridSearchCV(clf, param_grid=param_grid, cv=5)\n",
+    "grid_search.fit(x_train, y_train)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 165,
+   "id": "53a57bd4",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Best hyperparameters:  {'criterion': 'gini', 'max_depth': 2, 'min_samples_leaf': 2, 'min_samples_split': 2}\n",
+      "Best mean cross-validated score: 0.79\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(\"Best hyperparameters: \", grid_search.best_params_)\n",
+    "print(\"Best mean cross-validated score: {:.2f}\".format(grid_search.best_score_))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d1fdfe44",
+   "metadata": {},
+   "source": [
+    "#### Fitting model with new parameters and Feature importance"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 237,
+   "id": "bb169ae9",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<style>#sk-container-id-35 {color: black;background-color: white;}#sk-container-id-35 pre{padding: 0;}#sk-container-id-35 div.sk-toggleable {background-color: white;}#sk-container-id-35 label.sk-toggleable__label {cursor: pointer;display: block;width: 100%;margin-bottom: 0;padding: 0.3em;box-sizing: border-box;text-align: center;}#sk-container-id-35 label.sk-toggleable__label-arrow:before {content: \"▸\";float: left;margin-right: 0.25em;color: #696969;}#sk-container-id-35 label.sk-toggleable__label-arrow:hover:before {color: black;}#sk-container-id-35 div.sk-estimator:hover label.sk-toggleable__label-arrow:before {color: black;}#sk-container-id-35 div.sk-toggleable__content {max-height: 0;max-width: 0;overflow: hidden;text-align: left;background-color: #f0f8ff;}#sk-container-id-35 div.sk-toggleable__content pre {margin: 0.2em;color: black;border-radius: 0.25em;background-color: #f0f8ff;}#sk-container-id-35 input.sk-toggleable__control:checked~div.sk-toggleable__content {max-height: 200px;max-width: 100%;overflow: auto;}#sk-container-id-35 input.sk-toggleable__control:checked~label.sk-toggleable__label-arrow:before {content: \"▾\";}#sk-container-id-35 div.sk-estimator input.sk-toggleable__control:checked~label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-35 div.sk-label input.sk-toggleable__control:checked~label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-35 input.sk-hidden--visually {border: 0;clip: rect(1px 1px 1px 1px);clip: rect(1px, 1px, 1px, 1px);height: 1px;margin: -1px;overflow: hidden;padding: 0;position: absolute;width: 1px;}#sk-container-id-35 div.sk-estimator {font-family: monospace;background-color: #f0f8ff;border: 1px dotted black;border-radius: 0.25em;box-sizing: border-box;margin-bottom: 0.5em;}#sk-container-id-35 div.sk-estimator:hover {background-color: #d4ebff;}#sk-container-id-35 div.sk-parallel-item::after {content: \"\";width: 100%;border-bottom: 1px solid gray;flex-grow: 1;}#sk-container-id-35 div.sk-label:hover label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-35 div.sk-serial::before {content: \"\";position: absolute;border-left: 1px solid gray;box-sizing: border-box;top: 0;bottom: 0;left: 50%;z-index: 0;}#sk-container-id-35 div.sk-serial {display: flex;flex-direction: column;align-items: center;background-color: white;padding-right: 0.2em;padding-left: 0.2em;position: relative;}#sk-container-id-35 div.sk-item {position: relative;z-index: 1;}#sk-container-id-35 div.sk-parallel {display: flex;align-items: stretch;justify-content: center;background-color: white;position: relative;}#sk-container-id-35 div.sk-item::before, #sk-container-id-35 div.sk-parallel-item::before {content: \"\";position: absolute;border-left: 1px solid gray;box-sizing: border-box;top: 0;bottom: 0;left: 50%;z-index: -1;}#sk-container-id-35 div.sk-parallel-item {display: flex;flex-direction: column;z-index: 1;position: relative;background-color: white;}#sk-container-id-35 div.sk-parallel-item:first-child::after {align-self: flex-end;width: 50%;}#sk-container-id-35 div.sk-parallel-item:last-child::after {align-self: flex-start;width: 50%;}#sk-container-id-35 div.sk-parallel-item:only-child::after {width: 0;}#sk-container-id-35 div.sk-dashed-wrapped {border: 1px dashed gray;margin: 0 0.4em 0.5em 0.4em;box-sizing: border-box;padding-bottom: 0.4em;background-color: white;}#sk-container-id-35 div.sk-label label {font-family: monospace;font-weight: bold;display: inline-block;line-height: 1.2em;}#sk-container-id-35 div.sk-label-container {text-align: center;}#sk-container-id-35 div.sk-container {/* jupyter's `normalize.less` sets `[hidden] { display: none; }` but bootstrap.min.css set `[hidden] { display: none !important; }` so we also need the `!important` here to be able to override the default hidden behavior on the sphinx rendered scikit-learn.org. See: https://github.com/scikit-learn/scikit-learn/issues/21755 */display: inline-block !important;position: relative;}#sk-container-id-35 div.sk-text-repr-fallback {display: none;}</style><div id=\"sk-container-id-35\" class=\"sk-top-container\"><div class=\"sk-text-repr-fallback\"><pre>DecisionTreeClassifier(max_depth=2, min_samples_leaf=2)</pre><b>In a Jupyter environment, please rerun this cell to show the HTML representation or trust the notebook. <br />On GitHub, the HTML representation is unable to render, please try loading this page with nbviewer.org.</b></div><div class=\"sk-container\" hidden><div class=\"sk-item\"><div class=\"sk-estimator sk-toggleable\"><input class=\"sk-toggleable__control sk-hidden--visually\" id=\"sk-estimator-id-37\" type=\"checkbox\" checked><label for=\"sk-estimator-id-37\" class=\"sk-toggleable__label sk-toggleable__label-arrow\">DecisionTreeClassifier</label><div class=\"sk-toggleable__content\"><pre>DecisionTreeClassifier(max_depth=2, min_samples_leaf=2)</pre></div></div></div></div></div>"
+      ],
+      "text/plain": [
+       "DecisionTreeClassifier(max_depth=2, min_samples_leaf=2)"
+      ]
+     },
+     "execution_count": 237,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "best_dt = DecisionTreeClassifier(criterion='gini', max_depth=2, min_samples_leaf=2, min_samples_split=2)\n",
+    "best_dt.fit(x_train, y_train)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 238,
+   "id": "0cf1f7b1",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array([1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0],\n",
+       "      dtype=int64)"
+      ]
+     },
+     "execution_count": 238,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "treePredictions = decisionTree.predict(x_test)\n",
+    "treePredictions"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 239,
+   "id": "c525b24b",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "[[ 3  3]\n",
+      " [ 2 12]]\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(confusion_matrix(y_test, treePredictions))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 240,
+   "id": "9dc74e20",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "              precision    recall  f1-score   support\n",
+      "\n",
+      "           0       0.60      0.50      0.55         6\n",
+      "           1       0.80      0.86      0.83        14\n",
+      "\n",
+      "    accuracy                           0.75        20\n",
+      "   macro avg       0.70      0.68      0.69        20\n",
+      "weighted avg       0.74      0.75      0.74        20\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(classification_report(y_test, treePredictions))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 242,
+   "id": "e625402d",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "Age              0.432524\n",
+       "GenderR          0.000000\n",
+       "Protein1         0.000000\n",
+       "Protein2         0.000000\n",
+       "Protein3         0.000000\n",
+       "Protein4         0.567476\n",
+       "Tumour_StageR    0.000000\n",
+       "HistologyR       0.000000\n",
+       "Surgery_typeR    0.000000\n",
+       "ER statusR       0.000000\n",
+       "PR statusR       0.000000\n",
+       "HER2 statusR     0.000000\n",
+       "dtype: float64"
+      ]
+     },
+     "execution_count": 242,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "feature_importances = pd.Series(best_dt.feature_importances_, index=x.columns)\n",
+    "feature_importances"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "b0f2516e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#### move to spyder to create streamlit app"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.10.9"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
