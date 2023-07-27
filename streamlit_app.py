@@ -9,8 +9,9 @@ import streamlit as st
 import numpy as np
 import joblib
 
-#Interface for streamlit 
+#Interface for streamlit app
 
+#title
 st.markdown('## Breast Cancer Survival Prediction')
 
 Age = st.number_input('Age')
